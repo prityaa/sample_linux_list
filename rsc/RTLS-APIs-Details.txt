@@ -1,0 +1,520 @@
+1)GetApiKey API:
+
+Method: POST
+
+URL: "http://136.233.36.135:8764/v3/getapikey"
+
+Headers: ( key:value )
+"Content-type" : "application/json"
+"Accept": "application/json"
+
+Body:
+'{"userId":{"name":"testuser"}}'
+
+Response as below, after parsing JSON, just access 'apikey' and 'code' filed value:
+{
+  "userId": {
+    "name": XYZ,
+    "email": "xyz@gmail.com",
+    "imei": 123456
+  },
+  "policy": {
+    "maxRequestPerDay": 1500,
+    "minRequestIntervalSeconds": 120
+  },
+  "time": "17-06-2020:15:12:47.047+0000",
+  "code": 200,
+  "apikey": "62f452be-1053-4aec-b37a-6faf95d913f9"
+}
+
+2)GeoLocate API:
+
+Method: POST
+
+URL: "http://136.233.36.135:8764/v3/geolocate?serviceid=test-100&apikey=62f452be-1053-4aec-b37a-6faf95d913f9"
+
+In above URL, 'apikey' value is the key obtained in above Step1 GetApiKey.
+serviceid can have below values:
+test-100: MLS + Mozilla DB
+test-101: MLS + Jio DB
+test-102: Combain
+test-103: Skyhook
+test-104: Trilateration
+test-200: All
+
+Headers: ( key:value )
+"Content-type" : "application/json"
+"Accept": "application/json"
+
+Body: Get below lte values, dynamically
+'{ "ltecells": [
+		{
+		  "mcc": 401,
+		  "mnc": 402,
+		  "tac": 9001,
+		  "cellId": 409090,
+		  "rssi": -20
+		}
+		]
+}'
+
+Response as below, after parsing JSON, just access 'locations.lat', 'locations.lat', 'locations.accuracy' and code filed values:
+{
+  "status": {
+    "statusMessage": "Api Successful",
+    "startTime": "17-06-2020:16:02:36.036+0000",
+    "endTime": "17-06-2020:16:02:36.036+0000"
+  },
+  "locations": [
+      {
+         “provider”: {“name”: “MLS_JioDB”},
+         “status”: {“code”: 200},
+         "accuracy": "10.0",
+        "lat": 12.984543,
+        "lng": 77.673805
+     }
+],
+"policy": {
+    "maxRequestPerDay": 1500,
+    "minRequestIntervalSeconds": 120
+  },
+  "code": 200,
+  "time": "17-06-2020:15:59:48.048+0000"
+}
+
+
+3)GeoSubmit API:
+
+Method: POST
+
+URL: "http://136.233.36.135:8764/v3/geosubmit?serviceid=test-100&apikey=62f452be-1053-4aec-b37a-6faf95d913f9"
+
+In above URL, 'apikey' value is the key obtained in above Step1 GetApiKey.
+serviceid can have below values:
+test-100: MLS + Mozilla DB
+test-101: MLS + Jio DB
+test-102: Combain
+test-103: Skyhook
+test-104: Trilateration
+test-200: All
+
+Headers: ( key:value )
+"Content-type" : "application/json"
+"Accept": "application/json"
+
+Body: Get below lte values, dynamically
+'{ "items": [
+		{ 
+	 
+	 "position":
+	{
+		
+		 "ltd": 12.9845429,
+		  "lng": 77.6738048,
+		  "accuracy": 500,
+		  "age": 5000
+		
+	}
+	 }
+	 ]
+}'
+
+Response as below, after parsing JSON, just access 'message' and code filed values:
+{
+  "time": "17-06-2020:16:56:11.011+0000",
+  "code": 200,
+  "message": "Observation Submitted Successfully"
+}
+
+/////////////////////JS API Calls///////////
+
+function getAPIkey(){
+	getcelldata();
+
+	var url="http://136.233.36.135:8764/v3/getapikey";
+	console.log("Inside get api key "+url);
+
+  var oReq = new XMLHttpRequest({ mozSystem: true});
+
+ var params='{"userId":{"name":"shailendra"}}';
+
+ // TODO: Change to device IMEI or later
+  oReq.open("POST",url,true);
+
+oReq.setRequestHeader("Content-type", "application/json");
+oReq.setRequestHeader("Accept", "application/json");
+
+oReq.onreadystatechange = function() {//Call a function when the state changes.
+  if(oReq.readyState == 4 && oReq.status == 200) {
+    var res=JSON.parse(oReq.responseText);
+    apikey=res.apikey;
+	localStorage.setItem("apikey",apikey);
+console.log("got api key=" + apikey);
+  
+  }
+  else{
+     console.log("statusText=" + oReq.statusText);
+     //           console.log("responseText=" + oReq.responseText);
+  }
+  if(oReq.status == 400){
+
+  	console.log("Not authorized!")
+  	getAPIkey();
+  	
+  }
+  if(oReq.status == 404){
+
+  	console.log("Not found!")
+  	getAPIkey();
+  	
+  }
+}
+oReq.send(params);
+}
+
+
+function putrtlslocation(){
+	
+	console.log("Inside RTLS submit api");
+if((apikey == undefined ) || (apikey == null) || (apikey == 0) || (apikey == "") )
+{
+	getAPIkey();
+}
+
+  getcelldata();
+
+ 
+	var submiturl="http://136.233.36.135:8764/v3/geosubmit?serviceid=test-"+rtlsPutLocationConfig.serviceid+"&apikey="+apikey;
+	console.log("Inside RTLS submit api"+submiturl);
+
+   console.log("raditype,tac,MNC_calc,MCC_calc,Cell_Id,temp_rsrp"+raditype,TAC,MNC_calc,MCC_calc,Cell_Id,temp_rsrp)
+
+  var oReq = new XMLHttpRequest({ mozSystem: true });
+ 
+ if (rtlsPutLocationConfig.islte)
+ {
+	 var params= { "items": [
+		{ 
+	 
+	 "ltecells": [
+		{
+		 "mcc": MCC_calc,
+		  "mnc": MNC_calc,
+		  "tac": TAC,
+		  "cellId": Cell_Id,
+		  "rssi": temp_rsrp,
+		  "ta": timeadv,
+		  "serving": true
+		}
+		],
+	"position":
+	{
+		
+		 "ltd": rtlsgps.latitude,
+		  "lng": rtlsgps.longitude,
+		  "accuracy": rtlsgps.accuracy,
+		  "age": 5000
+		
+	}
+	 }
+	 ]
+}
+ } 
+ else if (rtlsPutLocationConfig.isbt)
+ {
+	
+	 var params= { "items": [
+		{ 
+	 
+	 "blebeacons": [
+    {
+      "macAddress": "ff:23:45:67:89:ab",
+      "name": "ble1",
+      "age": 1000,
+      "rssi": -50
+    },
+    {
+      "macAddress": "fe:23:45:67:89:ab",
+      "rssi": -60
+    },
+    {
+      "macAddress": "de:23:45:67:89:ab",
+      "rssi": -70
+    }
+  ],
+	"position":
+	{
+		
+		"ltd": rtlsgps.latitude,
+		  "lng": rtlsgps.longitude,
+		  "accuracy": rtlsgps.accuracy,
+		  "age": 5000
+	}
+	 }
+	 ]
+}
+ }
+ else if (rtlsPutLocationConfig.islte && rtlsPutLocationConfig.isbt)
+ {
+	 var params= { "items": [
+		{ 
+	 "ltecells": [
+    {
+     "mcc": MCC_calc,
+      "mnc": MNC_calc,
+      "tac": TAC,
+      "cellId": Cell_Id,
+      "rssi": temp_rsrp,
+      "ta": timeadv,
+      "serving": true
+     
+    }
+    ],
+    
+      "blebeacons": [
+    {
+      "macAddress": "ff:23:45:67:89:ab",
+      "name": "ble1",
+      "age": 1000,
+      "rssi": -50
+    },
+    {
+      "macAddress": "fe:23:45:67:89:ab",
+      "rssi": -60
+    },
+    {
+      "macAddress": "de:23:45:67:89:ab",
+      "rssi": -70
+    }
+  ],
+	"position":
+	{
+		
+			"ltd": rtlsgps.latitude,
+		  "lng": rtlsgps.longitude,
+		  "accuracy": rtlsgps.accuracy,
+		  "age": 5000
+		
+	}
+	 }
+	 ]
+}
+ }
+ else{
+	 
+ }
+ 
+
+
+    
+  oReq.open("POST",submiturl,true);
+
+oReq.setRequestHeader("Content-type", "application/json");
+
+oReq.setRequestHeader("Accept", "application/json");
+
+oReq.onreadystatechange = function() {//Call a function when the state changes.
+   if(oReq.readyState == 4 && oReq.status == 200) {
+	   var res=JSON.parse(oReq.responseText);
+    console.log("put api response>>>>>"+oReq.status);
+	var params1 = {"status":res.code};
+  
+  }
+  else{
+         console.log("statusText=" + oReq.statusText);
+               // console.log("responseText=" + oReq.responseText);
+               
+
+  }
+  if(oReq.status==400){
+  	console.log("Not authorized!")
+  	
+  }
+  if(oReq.status==404){
+  	console.log("Not found!")
+
+  }
+}
+
+oReq.send(JSON.stringify(params));
+  
+}
+
+function getrtlslocation(){
+	//getAPIkey();
+	if((apikey == undefined ) || (apikey == null) || (apikey == 0) || (apikey == "") )
+{
+	getAPIkey();
+}
+  getcelldata();
+	console.log("Inside RTLS getlocation function");
+     
+	var urlforrtls="http://136.233.36.135:8764/v3/geolocate?serviceid=test-"+rtlsGetLocationConfig.serviceid+"&apikey="+apikey;
+	console.log("Inside RTLS get api"+urlforrtls);
+
+   console.log("raditype,tac,MNC_calc,MCC_calc,Cell_Id,temp_rsrp,timingAdvance:"+timeadv+raditype,TAC,MNC_calc,MCC_calc,Cell_Id,temp_rsrp,timeadv)
+  var oReq = new XMLHttpRequest({ mozSystem: true });
+ 
+ if (rtlsGetLocationConfig.islte)
+ {
+	 var params= { "ltecells": [
+		{
+		 "mcc": MCC_calc,
+		  "mnc": MNC_calc,
+		  "tac": TAC,
+		  "cellId": Cell_Id,
+		  "rssi": temp_rsrp,
+		  "ta": timeadv,
+		  "serving": true
+		}
+		]
+	 }
+ } 
+ else if (rtlsGetLocationConfig.isbt)
+ {
+	
+	 var params= { "blebeacons": [
+    {
+      "macAddress": "ff:23:45:67:89:ab",
+      "name": "ble1",
+      "age": 1000,
+      "rssi": -50
+    },
+    {
+      "macAddress": "fe:23:45:67:89:ab",
+      "rssi": -60
+    },
+    {
+      "macAddress": "de:23:45:67:89:ab",
+      "rssi": -70
+    }
+  ]
+}
+ }
+ else if (rtlsGetLocationConfig.islte && rtlsGetLocationConfig.isbt)
+ {
+	 var params= { "ltecells": [
+    {
+     "mcc": MCC_calc,
+      "mnc": MNC_calc,
+      "tac": TAC,
+      "cellId": Cell_Id,
+      "rssi": temp_rsrp,
+      "ta": timeadv,
+      "serving": true
+     
+    }
+    ],
+    
+      "blebeacons": [
+    {
+      "macAddress": "ff:23:45:67:89:ab",
+      "name": "ble1",
+      "age": 1000,
+      "rssi": -50
+    },
+    {
+      "macAddress": "fe:23:45:67:89:ab",
+      "rssi": -60
+    },
+    {
+      "macAddress": "de:23:45:67:89:ab",
+      "rssi": -70
+    }
+  ]
+}
+ }
+ else{
+	 
+ }
+    
+  oReq.open("POST",urlforrtls,true);
+
+oReq.setRequestHeader("Content-type", "application/json");
+oReq.setRequestHeader("Accept", "application/json");
+
+oReq.onreadystatechange = function() {//Call a function when the state changes.
+  if(oReq.readyState == 4 && oReq.status == 200) {
+    var res=JSON.parse(oReq.responseText);
+	console.log("responseText=" + oReq.responseText);
+   rtlslat=res.locations.lat;
+    rtlslng=res.locations.lng;
+    rtlsacc=res.locations.accuracy;
+    console.log("rtlsacc>>>>>>>>>>>>>>"+rtlsacc);
+	
+  
+  }
+  else{
+         console.log("statusText=" + oReq.statusText);
+               // console.log("responseText=" + oReq.responseText);
+               
+
+  }
+  if(oReq.status == 400){
+
+  	console.log("Not authorized!")
+  	var gpsparms = {"status":400};
+
+  }
+  if(oReq.status == 404){
+
+  	console.log("Not found !")
+  	var gpsparms = {"status":404};
+
+  }
+}
+function getcelldata(){
+	console.log("getcelldata=");
+	//createbluetoothlock();
+	//createwifilock();
+
+
+  MNC_calc = navigator.mozMobileConnections[0].data.network.mnc;
+MCC_calc = navigator.mozMobileConnections[0].data.network.mcc;
+TAC= navigator.mozMobileConnections[0].data.cell.gsmLocationAreaCode;
+Cell_Id = navigator.mozMobileConnections[0].data.cell.gsmCellId;
+ raditype = navigator.mozMobileConnections[0].data.type;
+ timeadv = navigator.mozMobileConnections[0].signalStrength.lteTimingAdvance;
+ temp_rsrp = 0;
+ 
+								if(navigator.mozMobileConnections[0].data.signalStrength == undefined ){
+                                                if(navigator.mozMobileConnections[0].signalStrength){
+                                             //   alert("got rsrp from kai os 2.5 api");
+                                                temp_rsrp = navigator.mozMobileConnections[0].signalStrength.lteRsrp;
+                                               // alert(temp_rsrp);
+                                                }
+                                }
+                                else
+                                {
+                                               // alert("got rsrp from kai os 2.0 api");
+                                                temp_rsrp = navigator.mozMobileConnections[0].data.signalStrength;
+                                                //alert(temp_rsrp);
+                                }
+ 
+                                if(temp_rsrp == 0)
+                                {
+                                                Avg_RSRP = temp_rsrp;
+                                }
+                                else
+                                {
+                                                if(temp_rsrp > 0)
+												{
+													Avg_RSRP = 140 - temp_rsrp;
+												}
+												else if(temp_rsrp < 0)
+												{
+													Avg_RSRP = 140 + temp_rsrp;
+												}
+                                                else
+                                                {
+                                                                console.log("signalStrength is:"+ temp_rsrp);
+                                                }
+								}
+
+console.log("raditype,tac,MNC_calc,MCC_calc,Cell_Id,temp_rsrp,Avg_RSRP,timingAdvance:"+timeadv+raditype,TAC,MNC_calc,MCC_calc,Cell_Id,temp_rsrp,Avg_RSRP,timeadv);
+}
+
+oReq.send(JSON.stringify(params));
+  
+  
+}
