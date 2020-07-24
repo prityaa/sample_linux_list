@@ -16,7 +16,7 @@ EXE     := $(BIN)/rtls_impl
 
 LDLIBS  := -lcurl
 LDFLAGS	:= -L$(LIB)
-CFLAGS = -B $(CURL_PATH) -I$(JASON_INCLUDE)
+CFLAGS = -B $(CURL_PATH) -I$(JASON_INCLUDE) -I$(INCLUDE)
 
 .PHONY: all run clean
 
