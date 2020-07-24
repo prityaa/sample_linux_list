@@ -3,10 +3,13 @@
 #include <stdarg.h>
 #include <string.h>
 
-#include "rtlsRestApi.h"
-#include "httPostReqResp.h"
+#define DEBUG
+#include <dbg.h>
 
-#include "json.hpp"
+#include <rtlsRestApi.h>
+#include <httPostReqResp.h>
+
+#include <json.hpp>
 using json = nlohmann::json;
 
 /* url to test site */
@@ -16,7 +19,7 @@ int rtlsGetApiKey(struct getApiKeyReq_t reqParams, getApiKeyResp_t *respOut) {
     int ret = 0;
     json jsonRsp;
 
-    printf("getApiKey Enter\n");
+    dbg("getApiKey Enter\n");
   
     /* create json object body for post */  
     json j, jsonObj;
