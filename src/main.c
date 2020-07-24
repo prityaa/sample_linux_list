@@ -3,7 +3,7 @@
 #include <stdarg.h>
 #include <string.h>
 
-#include "rtlsRestApi.h"
+#include <rtlsRestApi.h>
 
 int main(int argc, char *argv[]) {
     char apiKey[256] = {0};
