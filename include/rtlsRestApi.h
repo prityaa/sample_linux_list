@@ -222,7 +222,8 @@ int rtlsGetApiKey(struct getApiKeyReq_t reqParams, getApiKeyResp_t *respOut);
 /* This API provides the location (latitude and longitude) to a User.
  * This API is also used to compare the location known to the User such as via GPS and that calculated by the service.
  */
-int rtlsGeoLocate(struct geoLocReq_t *reqParams, struct geoLocResp_t *respOut);
+int rtlsGeoLocate(struct geoLocReq_t *reqParams, 
+		struct geoLocResp_t *respOut);
 
 /* This API is used to submit the cell towers, wifi access points and Bluetooth beacons information to the location service DB.
  * Each request must contain at least one entry in the bluetoothBeacons or cells array or two entries in the wifiAccessPoints array.

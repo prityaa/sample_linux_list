@@ -19,7 +19,7 @@ int rtlsGetApiKey(struct getApiKeyReq_t reqParams, getApiKeyResp_t *respOut) {
     int ret = 0;
     json jsonRsp;
 
-    dbg("getApiKey Enter\n");
+    //dbg("getApiKey Enter\n");
   
     /* create json object body for post */  
     json j, jsonObj;
@@ -35,17 +35,17 @@ int rtlsGetApiKey(struct getApiKeyReq_t reqParams, getApiKeyResp_t *respOut) {
     
     ret = httpPostRequest(url, post_data, &rsp_code, &rsp_data);
 
-    printf("Response code = %ld\n", rsp_code);
+    //printf("Response code = %ld\n", rsp_code);
     
     if((rsp_code == 200) && (rsp_data.payload != NULL)) {
-        printf("Response data = %s\n", rsp_data.payload);
+        //printf("Response data = %s\n", rsp_data.payload);
     
         /* parse return */
         jsonRsp = json::parse(rsp_data.payload);
 
         std::cout << jsonRsp.dump(4) << std::endl;
-        std::cout << "Response code from json:" << jsonRsp["code"] << std::endl;
-        std::cout << "apikey from json:" << jsonRsp["apikey"] << std::endl;
+        //std::cout << "Response code from json:" << jsonRsp["code"] << std::endl;
+        //std::cout << "apikey from json:" << jsonRsp["apikey"] << std::endl;
         
         std::string api_key_str = jsonRsp["apikey"].get<std::string>();
         strcpy(respOut->apiKey, api_key_str.c_str());
