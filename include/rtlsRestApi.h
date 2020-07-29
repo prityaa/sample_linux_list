@@ -217,7 +217,7 @@ struct geoSubResp_t {
 /* This API to be used by every user to obtain a key to use in other APIs.
  * One of name or email or IMEI is mandatory.
  */
-int rtlsGetApiKey(struct getApiKeyReq_t reqParams, getApiKeyResp_t *respOut);
+int rtlsGetApiKey(struct getApiKeyReq_t *reqParams, getApiKeyResp_t *respOut);
 
 /* This API provides the location (latitude and longitude) to a User.
  * This API is also used to compare the location known to the User such as via GPS and that calculated by the service.
