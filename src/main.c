@@ -5,6 +5,7 @@
 
 #include <rtlsRestApi.h>
 
+#define DEBUG
 #include <dbg.h>
 
 void fill_key_req_packats(struct getApiKeyReq_t *req)
@@ -84,6 +85,65 @@ void fill_geo_locate_req_packets(struct geoLocReq_t *req,
 #endif
 }
 
+void fill_geo_submit_req_packets(struct geoSubReq_t *gsub_req, 
+		struct getApiKeyResp_t *key_resp,
+		struct geoLocResp_t *gloc_resp)
+{
+	struct geoSubItem_t *item;
+	strcpy(gsub_req->apiKey, key_resp->apiKey);
+	
+#if 0	
+	/* FIXME
+	 * as of now, hardcoding values, 
+	 * need to take vaues from geoLocResp_t 
+	 */
+
+	item = (struct geoSubItem_t *)malloc(sizeof(struct geoSubItem_t));
+	item->position.lat = 12.974518;
+	item->position.lng = 77.67275;
+	item->position.accuracy = 1000.0;
+	item->position.age = 5000; 
+
+	gsub_req->items = item;
+#endif
+}
+
+void print_all_data(struct getApiKeyResp_t *key_resp, 
+		struct geoLocResp_t *gloc_resp, 
+		struct geoSubResp_t *gsub_resp)
+{
+	printf("\n\n-----------------");
+	printf(" prit all data ");
+	printf("-----------------\n");
+
+	printf("\n\nAPI_key =>\n");
+	printf("name : %s\n", key_resp->uid.name);
+	printf("email : %s\n", key_resp->uid.email);
+	printf("imei : %s\n", key_resp->uid.imei);
+	printf("time : %s\n", key_resp->time);
+	printf("respCode : %d\n", key_resp->respCode);
+	printf("key : %s\n", key_resp->apiKey);
+
+	printf("\n\nGeo Locate =>\n");
+	printf("statusMessage = %s\n", gloc_resp->statusMessage);
+	printf("startTime = %s\n", gloc_resp->startTime);
+	printf("endTime = %s\n", gloc_resp->endTime);
+	printf("provider = %s\n", gloc_resp->locations->provider);
+	printf("statusCode = %d\n",
+                        gloc_resp->locations->statusCode);
+	printf("statusMsg = %s\n", gloc_resp->locations->statusMsg);
+	printf("latitude = %f\n", gloc_resp->locations->latitude);
+	printf("longitude = %f\n", gloc_resp->locations->longitude);
+	printf("accuracy = %f\n", gloc_resp->locations->accuracy);
+	printf("code = %d\n", gloc_resp->locations->code);
+	printf("time = %s\n", gloc_resp->locations->time);
+
+	printf("\n\nGeo Submit =>\n");
+	printf("time = %s\n", gsub_resp->time);
+	printf("resp->code = %d\n", gsub_resp->code);
+	printf("message = %s\n", gsub_resp->message);
+}
+
 
 int main(int argc, char *argv[]) 
 {
@@ -96,6 +156,10 @@ int main(int argc, char *argv[])
 	/* packet to get geo ordinates */
 	struct geoLocReq_t gloc_req;
 	struct geoLocResp_t gloc_resp;
+
+	/* packet to geo submit */
+	struct geoSubReq_t gsub_req;
+	struct geoSubResp_t gsub_resp;
 
 	/**
 	 * FEEDME :
@@ -116,12 +180,11 @@ int main(int argc, char *argv[])
 
 #ifdef DEBUG
 	/* get key */	
-	//dbg("key = %s\n", api_key);
 	printf("\n\n++++++++++++++++");
 	printf(" GEO LOCATE ");
 	printf("++++++++++++++++\n\n");
 #endif	
-#if 1
+
 	/* get geo locate */
 	/**
 	 * FEEDME :
@@ -137,10 +200,37 @@ int main(int argc, char *argv[])
 	
 	ret = rtlsGeoLocate(&gloc_req, &gloc_resp);
 	dbg("ret = %d\n", ret);
-	if (!ret) {
-		printf("failed to get Geo location\n");	
+	if (ret) {
+		printf("failed to get Geo location\n");
 		return -2;
 	}
-#endif
+
+#ifdef DEBUG
+	/* get key */	
+	printf("\n\n++++++++++++++++");
+	printf(" GEO SUBMIT ");
+	printf("++++++++++++++++\n\n");
+#endif	
+
+	/* geo submit */
+        /**
+         * FEEDME :
+         * struct req to be filled by MTK/kaios to get geo location
+         *
+         * example explained with fill_geo_submit_req_packets
+         */
+
+	fill_geo_submit_req_packets(&gsub_req, &key_resp, &gloc_resp);
+
+	ret = rtlsGeoSubmit(&gsub_req, &gsub_resp);
+	dbg("ret = %d\n", ret);
+	if (ret) {
+		printf("failed to submit\n");
+		return -3;
+	}
+
+	/* print all data */
+	print_all_data(&key_resp, &gloc_resp, &gsub_resp);
+
 	return 0;
 }
