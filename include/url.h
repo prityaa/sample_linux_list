@@ -24,6 +24,6 @@ struct struct_url {
 	char version[SIZE_8B];
 };
 
-void get_url(char *url, const char *key);
+void get_url(char *url, const char *key, const char *operation);
 #endif
 
