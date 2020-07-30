@@ -5,6 +5,7 @@
 #define SIZE_16B	16
 #define SIZE_256B	256
 
+#if 0
 const char *service_ids[] = {
 	"test-100:", 	/* MLS + Mozilla DB */
 	"test-101:", 	/* MLS + Jio DB	 */
@@ -13,6 +14,7 @@ const char *service_ids[] = {
 	"test-104:", 	/* Trilateration */
 	"test-200:", 	/* All */
 };
+#endif
 
 struct struct_url {
 	char ip[SIZE_16B];
@@ -22,5 +24,6 @@ struct struct_url {
 	char version[SIZE_8B];
 };
 
+void get_url(char *url, const char *key);
 #endif
 
