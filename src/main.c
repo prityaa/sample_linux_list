@@ -130,7 +130,11 @@ int main(int argc, char *argv[])
 	 * example explained with fill_geo_locate_req_packets
 	 */
 	fill_geo_locate_req_packets(&gloc_req, key_resp.apiKey);
-
+	
+	/* fill provider */
+        gloc_resp.locations = (struct respLocation_t *)malloc
+                (sizeof(struct respLocation_t));
+	
 	ret = rtlsGeoLocate(&gloc_req, &gloc_resp);
 	dbg("ret = %d\n", ret);
 	if (!ret) {

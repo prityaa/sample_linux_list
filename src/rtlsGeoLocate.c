@@ -3,7 +3,7 @@
 #include <stdarg.h>
 #include <string.h>
 
-//#define DEBUG
+#define DEBUG
 #include <dbg.h>
 #include <url.h>
 
@@ -16,9 +16,13 @@ using json = nlohmann::basic_json<std::map, std::vector, std::string, bool, std:
 
 void fill_gloc_resp(json jsonRsp, struct geoLocResp_t *resp)
 {
+#ifdef DEBUG
+	/* print loc response */
+	std::cout << "Geo Locate Response =>\n" << std::endl;
+	std::cout << jsonRsp.dump(4) << std::endl;
+#endif
 	/* fill statusMessage */
 #ifdef DEBUG
-	//std::cout << jsonRsp.dump(4) << std::endl;
 	std::cout << "statusMessage (unassigned):"
 		<< jsonRsp["status"]["statusMessage"] << std::endl;
 #endif
@@ -28,7 +32,6 @@ void fill_gloc_resp(json jsonRsp, struct geoLocResp_t *resp)
 
 	/* fill startTime */
 #ifdef DEBUG
-	//std::cout << jsonRsp.dump(4) << std::endl;
 	std::cout << "startTime (unassigned):"
 		<< jsonRsp["status"]["startTime"] << std::endl;
 #endif
@@ -38,7 +41,6 @@ void fill_gloc_resp(json jsonRsp, struct geoLocResp_t *resp)
 
 	/* fill endTime */
 #ifdef DEBUG
-	//std::cout << jsonRsp.dump(4) << std::endl;
 	std::cout << "endTime (unassigned):"
 		<< jsonRsp["status"]["endTime"] << std::endl;
 #endif
@@ -46,18 +48,14 @@ void fill_gloc_resp(json jsonRsp, struct geoLocResp_t *resp)
 	strcpy(resp->endTime, temp_str.c_str());
 	dbg("endTime = %s\n", resp->endTime);
 	
-	/* fill provider */
-	resp->locations = (struct respLocation_t *)malloc
-		(sizeof(struct respLocation_t));
-
 #ifdef DEBUG
         std::cout << "provider (unassigned):"
-                << jsonRsp["locations"][0]["provider"] << std::endl;
+                << jsonRsp["locations"][0]["provider"]["serviceId"] << std::endl;
 #endif
 	/** TODO */
-	//temp_str = jsonRsp["locations"][0]["provider"].get<std::to_string>();
-	//strcpy(resp->locations->provider, temp_str.c_str());
-	//dbg("provider = %s\n", temp_str);
+	temp_str = jsonRsp["locations"][0]["provider"]["serviceId"].get<std::string>();
+	strcpy(resp->locations->provider, temp_str.c_str());
+	dbg("provider = %s\n", resp->locations->provider);
 
 	/* fill statusCode */
 #ifdef DEBUG
@@ -171,32 +169,23 @@ int rtls_geo_locate(struct geoLocReq_t *req,
 #ifdef DEBUG
 	std::cout << "geolocate json body\n" << jsonObj.dump(4) << std::endl;
 #endif
-	get_url(url, req->apiKey);
+	get_url(url, req->apiKey, "geolocate");
 	dbg("url = %s\n", url);
 
 	ret = httpPostRequest(url, post_data, &rsp_code, &rsp_data);
 	dbg("Response code = %ld, ret = %d\n", rsp_code, ret);
 
-#if 1
 	if((rsp_code == 200) && (rsp_data.payload != NULL) && !ret) {
 		/* parse return */
 		jsonRsp = json::parse(rsp_data.payload);
 	
-#if 0
-		jsonRsp = json::parseFloat(rsp_data.payload);
-                std::cout << jsonRsp.dump(4) << std::endl;
-                std::cout << "Response code from json:"
-                        << jsonRsp["code"] << std::endl;
-                std::cout << "apikey from json:"
-                        << jsonRsp["status"]["statusMessage"] << std::endl;
-#endif	
 		fill_gloc_resp(jsonRsp, resp);	
 		free(rsp_data.payload);
 	} else {
 		dbg("Err in getting location\n");
 		return -2;
 	}
-#endif	
+	
 	return 0;	
 }
 
