@@ -61,7 +61,23 @@ int rtls_geo_submit(struct geoSubReq_t *req,
 	struct respData_t rsp_data;
 	char url[SIZE_256B];
 	json j, j_item, jsonObj;
+	struct geoSubItem_t *items = req->items;
+#if 1
+	for (; i < items->numLteCells; i++) {
+		j["mcc"] = items->lteCells[i].mcc;
+		j["mnc"] = items->lteCells[i].mnc;
+		j["tac"] = items->lteCells[i].tac;
+		j["cellId"] = items->lteCells[i].cellId;
+		j["rssi"] = items->lteCells[i].rssi;
+		jsonObj["ltecells"][i] = j;
+	}
 
+	j_item["ltd"] = items->position.lat;
+	j_item["lng"] = items->position.lng;
+	j_item["accuracy"] = items->position.accuracy;
+	j_item["age"] = items->position.age;
+	jsonObj["position"][0] = j_item;
+#else
 	/* create json object body for geo locate post */
 	j["mcc"] = 404;
 	j["mnc"] = 45;
@@ -89,7 +105,7 @@ int rtls_geo_submit(struct geoSubReq_t *req,
 	j_item["accuracy"] = 1000.0;
 	j_item["age"] = 5000;
 	jsonObj["position"][0] = j_item;
-
+#endif
 	std::string post_data = jsonObj.dump();
 #ifdef DEBUG
 	std::cout << "geosubmit json body\n" << jsonObj.dump(4) << std::endl;

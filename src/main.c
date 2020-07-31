@@ -89,23 +89,30 @@ void fill_geo_submit_req_packets(struct geoSubReq_t *gsub_req,
 		struct getApiKeyResp_t *key_resp,
 		struct geoLocResp_t *gloc_resp)
 {
-	struct geoSubItem_t *item;
+	struct geoSubItem_t *items;
+        struct lteCell_t *lteCells;
+        int i = 0;
+
 	strcpy(gsub_req->apiKey, key_resp->apiKey);
-	
-#if 0	
-	/* FIXME
-	 * as of now, hardcoding values, 
-	 * need to take vaues from geoLocResp_t 
-	 */
 
-	item = (struct geoSubItem_t *)malloc(sizeof(struct geoSubItem_t));
-	item->position.lat = 12.974518;
-	item->position.lng = 77.67275;
-	item->position.accuracy = 1000.0;
-	item->position.age = 5000; 
+	items = (struct geoSubItem_t *)malloc(sizeof(*items));
+        
+	/* fill lte cell */
+        items->numLteCells = 3;
+        lteCells = (struct lteCell_t *)
+                malloc((items->numLteCells)*sizeof(*lteCells));
+        memset(lteCells, '\0', (items->numLteCells)*sizeof(*lteCells));	
 
-	gsub_req->items = item;
+#if 1	
+	items->position.lat = gloc_resp->locations->latitude;
+	items->position.lng = gloc_resp->locations->longitude;
+	items->position.accuracy = gloc_resp->locations->accuracy;
+	items->position.age = 5000; 
 #endif
+	/* fill same ltecell data that is passed to geoLocate */
+	fill_lte_cell(lteCells);
+        items->lteCells = lteCells;
+	gsub_req->items = items;
 }
 
 void print_all_data(struct getApiKeyResp_t *key_resp, 
