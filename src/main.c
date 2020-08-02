@@ -4,8 +4,9 @@
 #include <string.h>
 
 #include <rtlsRestApi.h>
+#include <rtls_rsc.h>
 
-#define DEBUG
+//#define DEBUG
 #include <dbg.h>
 
 void fill_key_req_packats(struct getApiKeyReq_t *req)
@@ -50,7 +51,7 @@ void fill_geo_locate_req_packets(struct geoLocReq_t *req,
 	/* fill lte cell */
 	req->numLteCells = 3;
 	lteCells = (struct lteCell_t *)
-		malloc((req->numLteCells)*sizeof(*lteCells));
+		rtls_malloc((req->numLteCells)*sizeof(*lteCells));
 	memset(lteCells, '\0', (req->numLteCells)*sizeof(struct lteCell_t));
 
 #if 0        
@@ -95,12 +96,12 @@ void fill_geo_submit_req_packets(struct geoSubReq_t *gsub_req,
 
 	strcpy(gsub_req->apiKey, key_resp->apiKey);
 
-	items = (struct geoSubItem_t *)malloc(sizeof(*items));
+	items = (struct geoSubItem_t *)rtls_malloc(sizeof(*items));
         
 	/* fill lte cell */
         items->numLteCells = 3;
         lteCells = (struct lteCell_t *)
-                malloc((items->numLteCells)*sizeof(*lteCells));
+                rtls_malloc((items->numLteCells)*sizeof(*lteCells));
         memset(lteCells, '\0', (items->numLteCells)*sizeof(*lteCells));	
 
 #if 1	
@@ -156,6 +157,7 @@ int main(int argc, char *argv[])
 {
 	int ret = 0;
 
+	__rtls_init();
 	/* packets to get api key */
 	struct getApiKeyReq_t key_req;
 	struct getApiKeyResp_t key_resp;
@@ -239,5 +241,6 @@ int main(int argc, char *argv[])
 	/* print all data */
 	print_all_data(&key_resp, &gloc_resp, &gsub_resp);
 
+	__rtls_exit();
 	return 0;
 }
