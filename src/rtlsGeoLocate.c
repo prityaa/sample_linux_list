@@ -3,7 +3,7 @@
 #include <stdarg.h>
 #include <string.h>
 
-#define DEBUG
+//#define DEBUG
 #include <dbg.h>
 #include <url.h>
 
