@@ -17,6 +17,7 @@ void *rtls_malloc(int size)
 	struct list_head *list = &mem->list;	
 
 	dbg_list("&mem_list = %p\n", &mem_list);
+	
 	mem->addr = temp;
 	mem->size = size;
 	
@@ -84,6 +85,7 @@ int __rtls_init(void)
 void __rtls_exit(void)
 {       
 	dbg_list("exit\n");	
+	
 	free_mem(&mem_list); 
 	dbg_list("&mem_list = %p\n", &mem_list);
 	print_list_mem(&mem_list);
